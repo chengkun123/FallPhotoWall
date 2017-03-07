@@ -5,6 +5,8 @@ import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.util.LruCache;
 
+import java.io.FileDescriptor;
+
 /**
  * Created by Lenovo on 2017/2/18.
  */
@@ -64,6 +66,17 @@ public class ImageLoader {
         options.inJustDecodeBounds = false;
 
         return BitmapFactory.decodeFile(path, options);
+    }
+
+    public static Bitmap decodeSampledBitmapFromDescriptor(FileDescriptor fd, int reqWidth){
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFileDescriptor(fd, null, options);
+
+        options.inSampleSize = calculateInSampleSize(options, reqWidth);
+        options.inJustDecodeBounds = false;
+        return BitmapFactory.decodeFileDescriptor(fd, null, options);
+
     }
 
 }

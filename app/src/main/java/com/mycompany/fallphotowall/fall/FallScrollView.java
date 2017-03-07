@@ -2,7 +2,9 @@ package com.mycompany.fallphotowall.fall;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
@@ -14,15 +16,23 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
 import com.mycompany.fallphotowall.R;
+import com.mycompany.fallphotowall.util.DiskLruCache;
 import com.mycompany.fallphotowall.util.ImageLoader;
 import com.mycompany.fallphotowall.util.Images;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -34,6 +44,8 @@ import java.util.Set;
 public class FallScrollView extends ScrollView implements View.OnTouchListener{
     //工具
     private ImageLoader mImageLoader;
+    private DiskLruCache mDiskLruCache;
+
 
     private int columnWidth;
     private static Set<LoadImageTask> mTaskCollection;
@@ -93,13 +105,31 @@ public class FallScrollView extends ScrollView implements View.OnTouchListener{
     public FallScrollView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mImageLoader = ImageLoader.getInstance();
+        initDiskLruCache(context);
         mTaskCollection = new HashSet<>();
         setOnTouchListener(this);
+    }
+
+
+    /*
+    * 初始化DiskLruCache的缓存根目录
+    * */
+    private void initDiskLruCache(Context context){
+        try{
+            File saveFile = getDiskCacheDir(context, "thumb");
+            if(!saveFile.exists()){
+                saveFile.mkdirs();
+            }
+            mDiskLruCache = DiskLruCache.open(saveFile, 1, 1, 10 * 1024 *1024);
+        }catch (IOException e){
+            e.printStackTrace();
+        }
     }
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
+
         if(changed && !loadOnce){
             scrollViewHeight = getHeight();
             contentLayout = getChildAt(0);
@@ -182,6 +212,21 @@ public class FallScrollView extends ScrollView implements View.OnTouchListener{
     }
 
 
+    private File getDiskCacheDir(Context context, String fileName){
+        String fileDir;
+        if(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)
+                || !Environment.isExternalStorageRemovable()) {
+            fileDir = context.getExternalCacheDir().getPath();
+            Log.e("保存在了SD卡", "。。。");
+        }else{
+            fileDir = context.getCacheDir().getPath();
+            Log.e("保存在了内部存储", "。。。");
+        }
+        return new File(fileDir + File.separator + fileName);
+    }
+
+
+
     class LoadImageTask extends AsyncTask<Integer, Void, Bitmap>{
 
         //private String mImageUrl;
@@ -204,7 +249,6 @@ public class FallScrollView extends ScrollView implements View.OnTouchListener{
         protected Bitmap doInBackground(Integer... params) {
             mImagePos = params[0];
             String url = Images.imageUrls[mImagePos];
-
             Bitmap bitmap = mImageLoader.getBitmapFromMemoryCache(url);
             if(bitmap == null){
                 Log.e("Lru中没有，在内部存储和网络中获取","......");
@@ -217,9 +261,10 @@ public class FallScrollView extends ScrollView implements View.OnTouchListener{
         protected void onPostExecute(Bitmap bitmap) {
             if(bitmap != null){
                 Log.e("onPost中成功的到bitmap","....");
-                double ratio = bitmap.getWidth() / (columnWidth * 1.0);
-                int height = (int) (bitmap.getHeight() / ratio);
-                addImage(bitmap, columnWidth, height);
+                //以宽度
+                /*double ratio = bitmap.getWidth() / (columnWidth * 1.0);
+                int height = (int) (bitmap.getHeight() / ratio);*/
+                addImage(bitmap, columnWidth, bitmap.getHeight());
             }
             mTaskCollection.remove(this);
         }
@@ -227,14 +272,67 @@ public class FallScrollView extends ScrollView implements View.OnTouchListener{
 
 
         /*
-        * 如果图片不存在，下载并保存。从ImageLoader中返回
+        * 如果图片不存在，下载并缓存到内存、手机。
         * */
         private Bitmap loadImageFromDiskOrInternet(String imageUrl){
             //获取图片应该保存在的路径
-            String imagePath = getImagePath(imageUrl);
-            Log.e("文件保存的路径是",imagePath);
+            //String imagePath = getImagePath(imageUrl);
 
-            //如果文件不存在，从网络下载并保存在Lru中
+            FileDescriptor fileDescriptor = null;
+            FileInputStream fileInputStream = null;
+            DiskLruCache.Snapshot snapShot = null;
+            try{
+                String key = getKeyForDiskCache(imageUrl);
+                Log.e("文件保存的路径是",key);
+                snapShot = mDiskLruCache.get(key);
+
+                //如果手机中不存在，下载并保存在手机存储
+                if(snapShot == null){
+                    DiskLruCache.Editor editor = mDiskLruCache.edit(key);
+                    if(editor != null){
+                        //0代表保存文件的下标，这里因为设置每个文件大小为1，所以是0
+                        OutputStream os = editor.newOutputStream(0);
+                        if(downloadFromInternet(os, imageUrl)){
+                            editor.commit();
+                        }else{
+                            editor.abort();
+                        }
+                    }
+                    snapShot = mDiskLruCache.get(key);
+                }
+                //如果手机中存在，从输入流中解析
+                if(snapShot != null){
+                    fileInputStream = (FileInputStream) snapShot.getInputStream(0);
+                    fileDescriptor = fileInputStream.getFD();
+                }
+                Bitmap bitmap = null;
+                //这里直接获取的是压缩后的图片
+                if(fileDescriptor != null){
+                    bitmap = ImageLoader.decodeSampledBitmapFromDescriptor(fileDescriptor, columnWidth);
+                }
+
+                //把小图缓存到内存
+                if (bitmap != null){
+                    mImageLoader.addBitmapToMemoryCache(imageUrl, bitmap);
+                }
+                return bitmap;
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }finally {
+                if (fileDescriptor == null && fileInputStream != null) {
+                    try {
+                        fileInputStream.close();
+                    } catch (IOException e) {
+
+                    }
+                }
+            }
+            return null;
+
+
+
+            /*//如果文件不存在，从网络下载并保存在Lru中
             File file = new File(imagePath);
             if(!file.exists()){
                 Log.e("该路径下文件并不存在","从网络获取图片");
@@ -245,8 +343,40 @@ public class FallScrollView extends ScrollView implements View.OnTouchListener{
                 Log.e("从文件解析的bitmap空",""+(bitmap == null));
                 mImageLoader.addBitmapToMemoryCache(imageUrl, bitmap);
             }
-            return mImageLoader.getBitmapFromMemoryCache(imageUrl);
+            return mImageLoader.getBitmapFromMemoryCache(imageUrl);*/
         }
+
+        /*
+        * 把url用MD5转化为文件名用于保存
+        *
+        * */
+        private String getKeyForDiskCache(String url){
+            String key;
+            try {
+                MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+                messageDigest.update(url.getBytes());
+                key = bytesToHexString(messageDigest.digest());
+            } catch (NoSuchAlgorithmException e) {
+                key = String.valueOf(url.hashCode());
+            }
+            return key;
+        }
+
+        /*
+        * 把字节数组中的每一项转化为16进制并用字符串表示，连接这些字符串
+        * */
+        private String bytesToHexString(byte[] byteArray){
+            StringBuilder sb = new StringBuilder();
+            for(int i=0; i<byteArray.length; i++){
+                String temp = Integer.toHexString(0XFF & byteArray[i]);
+                if(temp.length() == 1){
+                    sb.append('0');
+                }
+                sb.append(temp);
+            }
+            return sb.toString();
+        }
+
 
         /*
         * 根据Url获得照片的名称并返回保存照片的最终路径
@@ -268,6 +398,41 @@ public class FallScrollView extends ScrollView implements View.OnTouchListener{
             return imagePath;
         }
 
+        private boolean downloadFromInternet(OutputStream os, String url){
+            HttpURLConnection connection = null;
+            BufferedInputStream bis = null;
+            BufferedOutputStream bos = null;
+            try {
+                URL url1 = new URL(url);
+                connection = (HttpURLConnection) url1.openConnection();
+                bis = new BufferedInputStream(connection.getInputStream(), 8*1024);
+                bos = new BufferedOutputStream(os, 8*1024);
+                int count;
+                while ((count = bis.read()) != -1){
+                    bos.write(count);
+                }
+                return true;
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }finally {
+                if(connection != null){
+                    connection.disconnect();
+                }
+                try {
+                    if(bis != null){
+                        bis.close();
+                    }
+                    if(bos != null){
+                        bos.close();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            return false;
+        }
 
 
         /*
@@ -379,4 +544,8 @@ public class FallScrollView extends ScrollView implements View.OnTouchListener{
             }
         }
     }
+
+
+
+
 }
