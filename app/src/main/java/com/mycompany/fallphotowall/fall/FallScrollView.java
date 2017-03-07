@@ -288,6 +288,7 @@ public class FallScrollView extends ScrollView implements View.OnTouchListener{
 
                 //如果手机中不存在，下载并保存在手机存储
                 if(snapShot == null){
+                    Log.e("正在从网络获取","...");
                     DiskLruCache.Editor editor = mDiskLruCache.edit(key);
                     if(editor != null){
                         //0代表保存文件的下标，这里因为设置每个文件大小为1，所以是0
@@ -302,6 +303,7 @@ public class FallScrollView extends ScrollView implements View.OnTouchListener{
                 }
                 //如果手机中存在，从输入流中解析
                 if(snapShot != null){
+                    Log.e("正在从手机内部存储获取","...");
                     fileInputStream = (FileInputStream) snapShot.getInputStream(0);
                     fileDescriptor = fileInputStream.getFD();
                 }
