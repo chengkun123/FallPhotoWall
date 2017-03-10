@@ -341,7 +341,7 @@ public class FallScrollView extends ScrollView implements View.OnTouchListener{
                 LoadImageFromInternet(imageUrl);
             }else{//如果文件是存在的，只是Lru中没有，就从文件中获取Bitmap
                 Log.e("该路径下文件存在","从文件中解析Bitmap");
-                Bitmap bitmap = ImageLoader.decodeSampledBitmapFromResource(imagePath, columnWidth);
+                Bitmap bitmap = Image2Loader.decodeSampledBitmapFromResource(imagePath, columnWidth);
                 Log.e("从文件解析的bitmap空",""+(bitmap == null));
                 mImageLoader.addBitmapToMemoryCache(imageUrl, bitmap);
             }
