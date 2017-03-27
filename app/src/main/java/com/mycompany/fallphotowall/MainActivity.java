@@ -7,19 +7,20 @@ import android.view.Window;
 
 
 import com.mycompany.fallphotowall.detail.DetailActivity;
-import com.mycompany.fallphotowall.fall.FallScrollView;
+import com.mycompany.fallphotowall.fall.ScrollFallView;
 
-public class MainActivity extends AppCompatActivity implements FallScrollView.OnPhotoClickListner{
-    private FallScrollView mFallScrollView;
 
+public class MainActivity extends AppCompatActivity implements ScrollFallView.OnPhotoClickListner{
+    //private FallScrollView mFallScrollView;
+    private ScrollFallView mScrollFallView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
-        mFallScrollView = (FallScrollView) findViewById(R.id.my_scroll_view);
-        mFallScrollView.setOnPhotoClickListner(this);
+        mScrollFallView = (ScrollFallView) findViewById(R.id.my_scroll_view);
+        mScrollFallView.setOnPhotoClickListner(this);
 
     }
 

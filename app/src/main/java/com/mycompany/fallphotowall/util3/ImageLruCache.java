@@ -4,11 +4,9 @@ import android.graphics.Bitmap;
 import android.util.LruCache;
 
 
-/**
- * Created by Lenovo on 2017/3/10.
- */
+
 public class ImageLruCache extends LruCache<String, Bitmap> {
-    public static final String TAG ="TAG";
+    public static final String TAG ="ImageLruCache";
 
     public static int maxMemory =(int) (Runtime.getRuntime().maxMemory() / 1024);
     public  static  int cacheSize = maxMemory / 8;

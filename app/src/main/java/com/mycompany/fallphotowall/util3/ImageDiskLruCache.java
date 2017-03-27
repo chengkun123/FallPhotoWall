@@ -17,9 +17,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-/**
- * Created by Lenovo on 2017/3/10.
- */
+
 public class ImageDiskLruCache {
     private DiskLruCache mDiskLruCache;
     private  boolean mIsDiskLruCacheCreated;
@@ -62,7 +60,7 @@ public class ImageDiskLruCache {
         if(snapshot != null){
             FileInputStream fileInputStream = (FileInputStream) snapshot.getInputStream(DISK_CACHE_INDEX);
             FileDescriptor fileDescriptor = fileInputStream.getFD();
-            bitmap = Image3Resizer.decodeSampledBitmapFromFileDescriptor(fileDescriptor, reqWidth, reqHeight);
+            bitmap = ImageResizer.decodeSampledBitmapFromFileDescriptor(fileDescriptor, reqWidth, reqHeight);
 
             /*if(bitmap != null){
                 addBitmapToLruCache(key, bitmap);
@@ -76,6 +74,9 @@ public class ImageDiskLruCache {
     * 从网络下载保存到DiskLru中
     * */
     public void downloadBitmapToDiskCache(String urlString) throws IOException {
+        if(Looper.myLooper() == Looper.getMainLooper()){
+            throw new RuntimeException("can not visit network from UI Thread");
+        }
         if(mDiskLruCache == null){
             return ;
         }
@@ -122,5 +123,13 @@ public class ImageDiskLruCache {
         final StatFs statFs = new StatFs(path.getPath());
         return (long)statFs.getBlockSize() * (long)statFs.getAvailableBlocks();
 
+    }
+
+    public boolean isDiskLruCacheCreated() {
+        return mIsDiskLruCacheCreated;
+    }
+
+    public void setIsDiskLruCacheCreated(boolean isDiskLruCacheCreated) {
+        mIsDiskLruCacheCreated = isDiskLruCacheCreated;
     }
 }

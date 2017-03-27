@@ -1,3 +1,4 @@
+/*
 package com.mycompany.fallphotowall.fall;
 
 import android.content.Context;
@@ -38,9 +39,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Created by Lenovo on 2017/2/19.
- */
+
 public class FallScrollView extends ScrollView implements View.OnTouchListener{
     //工具
     private ImageLoader mImageLoader;
@@ -76,6 +75,12 @@ public class FallScrollView extends ScrollView implements View.OnTouchListener{
         mOnPhotoClickListner = onPhotoClickListner;
     }
 
+
+    */
+/*
+    * 用Handler判断滑动是否停止
+    * *//*
+
     private static Handler sHandler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
@@ -83,14 +88,17 @@ public class FallScrollView extends ScrollView implements View.OnTouchListener{
             FallScrollView fallScrollView = (FallScrollView) msg.obj;
             int scrollY = fallScrollView.getScrollY();
 
+            //如果滑动停止了
             if(lastScrollY == scrollY){
+                //如果滑动到最底部，再加载15个
                 if(scrollY + scrollViewHeight >= contentLayout.getHeight()
                         && mTaskCollection.isEmpty()){
                     fallScrollView.loadOnePageImages();
                 }
+                //保证只有可视范围内的ImageView显示Bitmap
                 fallScrollView.checkAndSetVisibility();
 
-            }else{
+            }else{//如果没有停止，5ms后继续发送消息以检查
                 lastScrollY = scrollY;
                 Message m = new Message();
                 m.obj = fallScrollView;
@@ -111,9 +119,11 @@ public class FallScrollView extends ScrollView implements View.OnTouchListener{
     }
 
 
-    /*
+    */
+/*
     * 初始化DiskLruCache的缓存根目录
-    * */
+    * *//*
+
     private void initDiskLruCache(Context context){
         try{
             File saveFile = getDiskCacheDir(context, "thumb");
@@ -144,15 +154,19 @@ public class FallScrollView extends ScrollView implements View.OnTouchListener{
     }
 
 
-    /*
+    */
+/*
     * 加载15张图片
-    * */
+    * *//*
+
     private void loadOnePageImages(){
         Log.e("进入了加载的函数",".......");
         int start = page * PAGE_SIZE;
         int end = start + PAGE_SIZE;
-        /*int start = page * 3;
-        int end = start + 3;*/
+        */
+/*int start = page * 3;
+        int end = start + 3;*//*
+
 
         if(start < Images.imageUrls.length) {
             if (end > Images.imageUrls.length) {
@@ -176,9 +190,11 @@ public class FallScrollView extends ScrollView implements View.OnTouchListener{
             int top = (int) imageView.getTag(R.string.border_top);
             int bottom = (int) imageView.getTag(R.string.border_bottom);
 
-            /*
+            */
+/*
             * 需要显示
-            * */
+            * *//*
+
             if(bottom > getScrollY() && top < getScrollY() + scrollViewHeight){
                 String url = (String) imageView.getTag(R.string.image_url);
                 Bitmap bitmap = mImageLoader.getBitmapFromMemoryCache(url);
@@ -195,10 +211,12 @@ public class FallScrollView extends ScrollView implements View.OnTouchListener{
     }
 
 
-    /*private boolean hasSDCard(){
+    */
+/*private boolean hasSDCard(){
         return Environment.MEDIA_MOUNTED.equals(Environment
                 .getExternalStorageState());
-    }*/
+    }*//*
+
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
@@ -242,9 +260,11 @@ public class FallScrollView extends ScrollView implements View.OnTouchListener{
             mImageView = imageView;
         }
 
-        /*
+        */
+/*
         * 根据url找到bitmap，如果不存在直接下载并保存
-        * */
+        * *//*
+
         @Override
         protected Bitmap doInBackground(Integer... params) {
             mImagePos = params[0];
@@ -262,8 +282,10 @@ public class FallScrollView extends ScrollView implements View.OnTouchListener{
             if(bitmap != null){
                 Log.e("onPost中成功的到bitmap","....");
                 //以宽度
-                /*double ratio = bitmap.getWidth() / (columnWidth * 1.0);
-                int height = (int) (bitmap.getHeight() / ratio);*/
+                */
+/*double ratio = bitmap.getWidth() / (columnWidth * 1.0);
+                int height = (int) (bitmap.getHeight() / ratio);*//*
+
                 addImage(bitmap, columnWidth, bitmap.getHeight());
             }
             mTaskCollection.remove(this);
@@ -271,9 +293,11 @@ public class FallScrollView extends ScrollView implements View.OnTouchListener{
 
 
 
-        /*
+        */
+/*
         * 如果图片不存在，下载并缓存到内存、手机。
-        * */
+        * *//*
+
         private Bitmap loadImageFromDiskOrInternet(String imageUrl){
             //获取图片应该保存在的路径
             //String imagePath = getImagePath(imageUrl);
@@ -334,7 +358,9 @@ public class FallScrollView extends ScrollView implements View.OnTouchListener{
 
 
 
-            /*//如果文件不存在，从网络下载并保存在Lru中
+            */
+/*//*
+/如果文件不存在，从网络下载并保存在Lru中
             File file = new File(imagePath);
             if(!file.exists()){
                 Log.e("该路径下文件并不存在","从网络获取图片");
@@ -345,13 +371,16 @@ public class FallScrollView extends ScrollView implements View.OnTouchListener{
                 Log.e("从文件解析的bitmap空",""+(bitmap == null));
                 mImageLoader.addBitmapToMemoryCache(imageUrl, bitmap);
             }
-            return mImageLoader.getBitmapFromMemoryCache(imageUrl);*/
+            return mImageLoader.getBitmapFromMemoryCache(imageUrl);*//*
+
         }
 
-        /*
+        */
+/*
         * 把url用MD5转化为文件名用于保存
         *
-        * */
+        * *//*
+
         private String getKeyForDiskCache(String url){
             String key;
             try {
@@ -364,9 +393,11 @@ public class FallScrollView extends ScrollView implements View.OnTouchListener{
             return key;
         }
 
-        /*
+        */
+/*
         * 把字节数组中的每一项转化为16进制并用字符串表示，连接这些字符串
-        * */
+        * *//*
+
         private String bytesToHexString(byte[] byteArray){
             StringBuilder sb = new StringBuilder();
             for(int i=0; i<byteArray.length; i++){
@@ -380,9 +411,11 @@ public class FallScrollView extends ScrollView implements View.OnTouchListener{
         }
 
 
-        /*
+        */
+/*
         * 根据Url获得照片的名称并返回保存照片的最终路径
-        * */
+        * *//*
+
         private String getImagePath(String url){
             int index = url.lastIndexOf("/");
             String imageName = url.substring(index + 1);
@@ -437,9 +470,11 @@ public class FallScrollView extends ScrollView implements View.OnTouchListener{
         }
 
 
-        /*
+        */
+/*
         * 根据url下载图片并保存到ImageLoader中
-        * */
+        * *//*
+
         private void LoadImageFromInternet(String imageUrl){
             Log.e("开始下载", ".....");
             HttpURLConnection con = null;
@@ -496,9 +531,11 @@ public class FallScrollView extends ScrollView implements View.OnTouchListener{
 
         }
 
-        /*
+        */
+/*
         * 在某个column中添加图片，如果ImageView存在，直接添加；不存在新建一个ImageView
-        * */
+        * *//*
+
         private void addImage(Bitmap bitmap, int width, int height){
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(width, height);
             if(mImageView != null){
@@ -524,9 +561,11 @@ public class FallScrollView extends ScrollView implements View.OnTouchListener{
 
         }
 
-        /*
+        */
+/*
         * 找到合适的column
-        * */
+        * *//*
+
         private LinearLayout findRightColumn(ImageView imageView, int height){
             if(firstColumnHeight <= secondColumnHeight && firstColumnHeight <= thirdColumnHeight){
                 imageView.setTag(R.string.border_top, firstColumnHeight);
@@ -551,3 +590,4 @@ public class FallScrollView extends ScrollView implements View.OnTouchListener{
 
 
 }
+*/

@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 import android.widget.ImageView;
 
 /**
- * 用于发送结果给主线程进行绑定
+ * 用于发送结果给主线程进行ImageView的更新
  */
 public class TaskResult {
     public String uri;
@@ -16,5 +16,4 @@ public class TaskResult {
         this.imageView = imageView;
         this.bitmap = bitmap;
     }
-
 }

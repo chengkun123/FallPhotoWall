@@ -3,9 +3,7 @@ package com.mycompany.fallphotowall.util3;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-/**
- * Created by Lenovo on 2017/3/10.
- */
+
 public class MD5Util {
     /*
     * 把url转换为MD5或者hashcode

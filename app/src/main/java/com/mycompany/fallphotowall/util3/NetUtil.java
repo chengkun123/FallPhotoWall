@@ -11,9 +11,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-/**
- * Created by Lenovo on 2017/3/10.
- */
+
 public class NetUtil {
 
     /*

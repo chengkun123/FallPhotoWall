@@ -7,13 +7,11 @@ import android.util.Log;
 
 import java.io.FileDescriptor;
 
-/**
- * Created by Lenovo on 2017/3/10.
- */
-public class Image3Resizer {
+
+public class ImageResizer {
     private final static String TAG = "ImageResizer";
 
-    public Image3Resizer(){
+    public ImageResizer(){
 
     }
 

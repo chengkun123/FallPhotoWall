@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.mycompany.fallphotowall.fall.FallScrollView
+<com.mycompany.fallphotowall.fall.ScrollFallView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/my_scroll_view"
     android:layout_width="match_parent"
@@ -35,4 +35,4 @@
         </LinearLayout>
     </LinearLayout>
 
-</com.mycompany.fallphotowall.fall.FallScrollView>
+</com.mycompany.fallphotowall.fall.ScrollFallView>

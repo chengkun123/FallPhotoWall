@@ -7,9 +7,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * Created by Lenovo on 2017/3/10.
- */
 public class ImageThreadPoolExecutor extends ThreadPoolExecutor {
     private static ImageThreadPoolExecutor imageThreadPoolExecutor;
 
@@ -46,12 +43,11 @@ public class ImageThreadPoolExecutor extends ThreadPoolExecutor {
     * */
     public static synchronized ImageThreadPoolExecutor getInstance(){
         if(imageThreadPoolExecutor==null){
-            imageThreadPoolExecutor =
-                    new ImageThreadPoolExecutor(CORE_POOL_SIZE
-                            ,MAXIMUM_POOL_SIZE
-                            ,KEEP_ALIVE
-                            ,TimeUnit.SECONDS
-                            ,new LinkedBlockingDeque<Runnable>(),sThreadFactory);
+            imageThreadPoolExecutor = new ImageThreadPoolExecutor(CORE_POOL_SIZE
+                    ,MAXIMUM_POOL_SIZE
+                    ,KEEP_ALIVE
+                    ,TimeUnit.SECONDS
+                    ,new LinkedBlockingDeque<Runnable>(),sThreadFactory);
         }
         return imageThreadPoolExecutor;
     }
