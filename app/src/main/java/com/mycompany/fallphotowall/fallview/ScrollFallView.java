@@ -1,4 +1,4 @@
-package com.mycompany.fallphotowall.fall;
+package com.mycompany.fallphotowall.fallview;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -15,21 +15,18 @@ import android.widget.ScrollView;
 import com.mycompany.fallphotowall.R;
 
 import com.mycompany.fallphotowall.util.Images;
-import com.mycompany.fallphotowall.util3.ImageLoader;
+import com.mycompany.fallphotowall.util.ImageLoader;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
 public class ScrollFallView extends ScrollView implements View.OnTouchListener, ImageLoader.BitmapCallback{
-    //工具
-    //private ImageLoader mImageLoader;
-    //private DiskLruCache mDiskLruCache;
+
     private ImageLoader mImageLoader;
     private Context mContext;
 
     private int columnWidth;
-    //private static Set<LoadImageTask> mTaskCollection;
     private List<ImageView> mImageViewList = new ArrayList<>();
     private boolean loadOnce;
     private static int scrollViewHeight;
@@ -122,21 +119,16 @@ public class ScrollFallView extends ScrollView implements View.OnTouchListener, 
     * 加载15张图片
     * */
     private void loadOnePageImages(){
-        Log.e("进入了加载的函数",".......");
+        Log.e("进入了加载的函数", ".......");
         int start = page * PAGE_SIZE;
         int end = start + PAGE_SIZE;
-
 
         if(start < Images.imageUrls.length) {
             if (end > Images.imageUrls.length) {
                 end = Images.imageUrls.length;
             }
             for (int i = start; i < end; i++) {
-
                 mImageLoader.findBitmap(Images.imageUrls[i], this, columnWidth, 1);
-                //LoadImageTask task = new LoadImageTask();
-                //mTaskCollection.add(task);
-                //task.execute(i);
             }
             page++;
         }else{
@@ -181,20 +173,17 @@ public class ScrollFallView extends ScrollView implements View.OnTouchListener, 
         return false;
     }
 
-
     @Override
     public void onResponse(Bitmap bitmap, String url) {
         addImage(bitmap, url, columnWidth, bitmap.getHeight());
     }
 
-
-
     /*
-        * 在某个column中添加图片，如果ImageView存在，直接添加；不存在新建一个ImageView
-        * */
+    *  新建ImageView并且添加照片
+    * */
     private void addImage(Bitmap bitmap, String url, int width, int height){
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(width, height);
-        //第一次添加ImageView的时候为其添加3个Tag
+
         ImageView imageView = new ImageView(getContext());
         imageView.setPadding(5, 5, 5, 5);
         imageView.setImageBitmap(bitmap);
@@ -209,12 +198,13 @@ public class ScrollFallView extends ScrollView implements View.OnTouchListener, 
         });
         LinearLayout resultColumn = findRightColumn(imageView, height);
         resultColumn.addView(imageView);
-        mImageViewList.add(imageView);
 
+        //将ImageView按照完成顺序添加在
+        mImageViewList.add(imageView);
     }
 
     /*
-    * 找到合适的column
+    * 找到当前高度最小的column
     * */
     private LinearLayout findRightColumn(ImageView imageView, int height){
         if(firstColumnHeight <= secondColumnHeight && firstColumnHeight <= thirdColumnHeight){
@@ -234,6 +224,5 @@ public class ScrollFallView extends ScrollView implements View.OnTouchListener, 
             return mThirdColumn;
         }
     }
-
 
 }

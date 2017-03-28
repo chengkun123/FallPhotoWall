@@ -1,4 +1,4 @@
-package com.mycompany.fallphotowall.util3;
+package com.mycompany.fallphotowall.util;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;

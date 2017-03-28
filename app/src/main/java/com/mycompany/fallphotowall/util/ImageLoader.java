@@ -1,4 +1,4 @@
-package com.mycompany.fallphotowall.util3;
+package com.mycompany.fallphotowall.util;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -11,9 +11,7 @@ import com.mycompany.fallphotowall.R;
 import java.io.IOException;
 import java.util.concurrent.ThreadPoolExecutor;
 
-/**
- * Created by Lenovo on 2017/3/10.
- */
+
 public class ImageLoader {
     private static volatile ImageLoader instance = null;
     private Context mContext;
@@ -98,7 +96,7 @@ public class ImageLoader {
     /*
     * 异步接口，仅返回Bitmap
     * */
-    public void findBitmap(final String url, final BitmapCallback callback,int reqWidth,int reqHeight){
+    public void findBitmap(final String url, final BitmapCallback callback, int reqWidth, int reqHeight){
         //从内存缓存中获取bitmap
         final Bitmap bitmap = imageLrucache.loadBitmapFromLruCacheByUrl(url);
         if(bitmap != null){

@@ -1,4 +1,4 @@
-package com.mycompany.fallphotowall.util3;
+package com.mycompany.fallphotowall.util;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -8,8 +8,6 @@ import android.os.Environment;
 import android.os.Looper;
 import android.os.StatFs;
 import android.util.Log;
-
-import com.mycompany.fallphotowall.util.DiskLruCache;
 
 import java.io.File;
 import java.io.FileDescriptor;

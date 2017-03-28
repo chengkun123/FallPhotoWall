@@ -1,4 +1,4 @@
-package com.mycompany.fallphotowall.util3;
+package com.mycompany.fallphotowall.util;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;

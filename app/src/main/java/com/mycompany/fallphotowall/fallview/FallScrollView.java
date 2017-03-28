@@ -19,7 +19,7 @@ import android.widget.ScrollView;
 import com.mycompany.fallphotowall.R;
 import com.mycompany.fallphotowall.util.DiskLruCache;
 import com.mycompany.fallphotowall.util.ImageLoader;
-import com.mycompany.fallphotowall.util.Images;
+import com.mycompany.fallphotowall.util3.Images;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

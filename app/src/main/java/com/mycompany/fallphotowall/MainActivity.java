@@ -7,7 +7,7 @@ import android.view.Window;
 
 
 import com.mycompany.fallphotowall.detail.DetailActivity;
-import com.mycompany.fallphotowall.fall.ScrollFallView;
+import com.mycompany.fallphotowall.fallview.ScrollFallView;
 
 
 public class MainActivity extends AppCompatActivity implements ScrollFallView.OnPhotoClickListner{
