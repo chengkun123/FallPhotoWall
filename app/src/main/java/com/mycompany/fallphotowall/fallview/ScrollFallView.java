@@ -151,8 +151,6 @@ public class ScrollFallView extends ScrollView implements View.OnTouchListener, 
                 Bitmap bitmap = mImageLoader.getImageLruCache().loadBitmapFromLruCacheByUrl(url);
                 if(bitmap == null){//如果Lru中没有了
                     mImageLoader.bindBitmap(url, imageView, imageView.getWidth(), imageView.getHeight());
-                    /*LoadImageTask task = new LoadImageTask(imageView);
-                    task.execute(i);*/
                 }else{
                     imageView.setImageBitmap(bitmap);
                 }
